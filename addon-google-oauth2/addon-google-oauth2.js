@@ -9,12 +9,12 @@ module.exports={
 		return ss.storage.access_token;
 	},
 	login: function(options,callback){
-		/* options should have scopes,client id, client secret, callback*/
+		/* options should have scopes, client id, client secret, loginHtml, loginJs, callback*/
 		var url="https://accounts.google.com/o/oauth2/auth?scope="+options.scopes+"&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id="+options.client_id;
 		tabs.open(url);
 		pageMod.PageMod({
-			include: self.data.url("login.html"),
-			contentScriptFile: self.data.url("login.js"),
+			include: self.data.url(options.loginHtml),
+			contentScriptFile: self.data.url(options.loginJs),
 			onMessage: function(code){
 						request.Request({
 							url: "https://www.googleapis.com/oauth2/v3/token",
@@ -33,7 +33,7 @@ module.exports={
 						}).post();
 			}
 		});
-		tabs.open(self.data.url("login.html"));
+		tabs.open(self.data.url(options.loginHtml));
 	},
 	refreshToken: function(options, callback){
 		if(ss.storage.refresh_token == undefined)
