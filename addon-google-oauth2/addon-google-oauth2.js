@@ -11,7 +11,13 @@ module.exports={
 	login: function(options,callback){
 		/* options should have scopes, client id, client secret, loginHtml, loginJs, callback*/
 		var url="https://accounts.google.com/o/oauth2/auth?scope="+options.scopes+"&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&client_id="+options.client_id;
-		tabs.open(url);
+		var tab_oauth;
+		var tab_login;
+		tabs.open({
+			url: url,
+			onOpen: function(tab) {
+					tab_oauth = tab;
+			}});
 		pageMod.PageMod({
 			include: self.data.url(options.loginHtml),
 			contentScriptFile: self.data.url(options.loginJs),
@@ -26,6 +32,8 @@ module.exports={
 								redirect_uri: "urn:ietf:wg:oauth:2.0:oob"
 							},
 							onComplete: function(response){
+								tab_oauth.close();
+								tab_login.close();
 								ss.storage.access_token=response.json.access_token;
 								ss.storage.refresh_token=response.json.refresh_token;
 								callback(ss.storage.access_token);
@@ -33,7 +41,11 @@ module.exports={
 						}).post();
 			}
 		});
-		tabs.open(self.data.url(options.loginHtml));
+		tabs.open({
+			url: self.data.url(options.loginHtml),
+			onOpen: function(tab) {
+					tab_login = tab;
+			}});
 	},
 	refreshToken: function(options, callback){
 		if(ss.storage.refresh_token == undefined)
